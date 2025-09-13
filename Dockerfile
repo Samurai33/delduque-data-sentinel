@@ -15,15 +15,15 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copie os arquivos de requirements e instale as dependências
-COPY nathan_dashboard/requirements.txt ./
+COPY delduquedatasentinel/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copie o restante do código do app
-COPY nathan_dashboard/ ./nathan_dashboard/
+COPY delduquedatasentinel/ ./delduquedatasentinel/
 COPY asciiart ./asciiart
 
 # Exponha a porta padrão do Streamlit
 EXPOSE 8501
 
 # Comando para rodar o Streamlit
-CMD ["streamlit", "run", "nathan_dashboard/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "delduquedatasentinel/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
