@@ -1,0 +1,19 @@
+# .gitignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+.env
+*.db
+*.sqlite3
+*.log
+.idea/
+.vscode/
+.DS_Store
+*.xlsx
+*.xls
+Thumbs.db
+node_modules/
+*.tmp
+*.temp

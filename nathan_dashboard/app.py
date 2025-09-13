@@ -161,7 +161,7 @@ def display_charts(df: pd.DataFrame, date_col: str):
             title='Top 10 responsáveis (mais registros)'
         )
         fig_top.update_layout(xaxis_title='', yaxis_title='Total')
-    st.plotly_chart(fig_top, width='stretch')
+        st.plotly_chart(fig_top, width='stretch')
 
     # Evolução temporal
     if date_col in df.columns:
@@ -182,7 +182,7 @@ def display_charts(df: pd.DataFrame, date_col: str):
             title='Evolução de registros ao longo do tempo'
         )
         fig_time.update_layout(xaxis_title='Data', yaxis_title='Total')
-    st.plotly_chart(fig_time, width='stretch')
+        st.plotly_chart(fig_time, width='stretch')
 
     # Distribuição por categoria
     if 'Categoria' in df.columns:
@@ -195,7 +195,7 @@ def display_charts(df: pd.DataFrame, date_col: str):
             title='Distribuição por categoria'
         )
         fig_cat.update_layout(xaxis_title='', yaxis_title='Total')
-    st.plotly_chart(fig_cat, width='stretch')
+        st.plotly_chart(fig_cat, width='stretch')
 
 
 def display_table(df: pd.DataFrame):
