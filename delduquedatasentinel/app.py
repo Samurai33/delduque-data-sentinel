@@ -1,17 +1,38 @@
 import os
+import logging
+import datetime
+
+# Configuração do sistema de logging
+def setup_logging():
+    """Configura o sistema de logging com informações detalhadas"""
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s | %(levelname)s | %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    return logging.getLogger(__name__)
+
+logger = setup_logging()
+
 def print_ascii_art():
     asciiart_path = os.path.join(os.path.dirname(__file__), '..', 'asciiart')
     try:
         with open(asciiart_path, 'r', encoding='utf-8') as f:
             art = f.read()
         print(art)
+        logger.info("🎨 Arte ASCII carregada com sucesso")
     except Exception as e:
+        logger.error(f"❌ Falha ao carregar arte ASCII: {e}")
         print('Não foi possível carregar a arte ASCII:', e)
 
+logger.info("🚀 Iniciando Desduque Data Sentinel...")
 print_ascii_art()
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+
+logger.info("📦 Bibliotecas importadas com sucesso")
 
 
 @st.cache_data(show_spinner=False)
@@ -22,16 +43,33 @@ def load_data(file_path: str):
     O uso de `st.cache_data` garante que o arquivo só seja lido uma vez durante
     a sessão, melhorando a performance.
     """
-    xls = pd.ExcelFile(file_path)
-    data = {}
-    for name in xls.sheet_names:
-        try:
-            df = xls.parse(name)
-            data[name] = df
-        except Exception:
-            # ignore sheets that cannot be parsed
-            pass
-    return data
+    logger.info(f"📊 Iniciando carregamento de dados: {file_path}")
+    start_time = datetime.datetime.now()
+    
+    try:
+        xls = pd.ExcelFile(file_path)
+        data = {}
+        sheet_count = 0
+        
+        for name in xls.sheet_names:
+            try:
+                df = xls.parse(name)
+                data[name] = df
+                sheet_count += 1
+                logger.info(f"✅ Aba '{name}' carregada: {len(df)} registros")
+            except Exception as e:
+                logger.warning(f"⚠️ Falha ao carregar aba '{name}': {e}")
+                # ignore sheets that cannot be parsed
+                pass
+        
+        end_time = datetime.datetime.now()
+        duration = (end_time - start_time).total_seconds()
+        logger.info(f"🎯 Carregamento concluído: {sheet_count} abas em {duration:.2f}s")
+        return data
+        
+    except Exception as e:
+        logger.error(f"❌ Erro crítico ao carregar arquivo: {e}")
+        raise
 
 
 def prepare_dataframe(df: pd.DataFrame, date_col: str) -> pd.DataFrame:
@@ -44,10 +82,23 @@ def prepare_dataframe(df: pd.DataFrame, date_col: str) -> pd.DataFrame:
     Returns:
         DataFrame com a coluna de data convertida
     """
+    logger.info(f"🔄 Preparando DataFrame: {len(df)} registros iniciais")
+    
     df = df.copy()
     if date_col in df.columns:
+        original_count = len(df)
         df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
         df = df.dropna(subset=[date_col])
+        final_count = len(df)
+        
+        if original_count != final_count:
+            removed = original_count - final_count
+            logger.info(f"🧹 Removidos {removed} registros com datas inválidas")
+        
+        logger.info(f"✅ DataFrame preparado: {final_count} registros válidos")
+    else:
+        logger.warning(f"⚠️ Coluna de data '{date_col}' não encontrada")
+    
     return df
 
 
@@ -210,6 +261,7 @@ def display_table(df: pd.DataFrame):
 
 
 def main():
+    logger.info("🖥️ Iniciando interface Streamlit")
     st.set_page_config(page_title='Desduque Data Sentinel', layout='wide')
     st.title('Desduque Data Sentinel')
 
@@ -219,24 +271,55 @@ def main():
         'escolher os gráficos adequados, manter a hierarquia visual e focar na clareza.'
     )
 
-    data = load_data('base_delduque.xlsx')
+    # Verificar se arquivo existe
+    file_path = 'base_delduque.xlsx'
+    if not os.path.exists(file_path):
+        logger.error(f"❌ Arquivo não encontrado: {file_path}")
+        st.error(f"❌ Arquivo não encontrado: `{file_path}`")
+        st.stop()
+
+    data = load_data(file_path)
     # Apenas abas relevantes para o painel
     sheet_options = [s for s in ['ATIVOS PF E PJ', 'CANCELADOS'] if s in data]
+    
+    if not sheet_options:
+        logger.error("❌ Nenhuma aba relevante encontrada")
+        st.error("❌ Abas 'ATIVOS PF E PJ' ou 'CANCELADOS' não encontradas no arquivo")
+        st.stop()
+    
+    logger.info(f"📋 Abas disponíveis: {sheet_options}")
     sheet = st.sidebar.selectbox('Selecionar aba', sheet_options)
+    logger.info(f"🔍 Aba selecionada: {sheet}")
+    
     df = data[sheet]
     date_col = 'Data de cadastro' if sheet == 'ATIVOS PF E PJ' else 'Data de saida'
+    logger.info(f"📅 Coluna de data definida: {date_col}")
+    
     df = prepare_dataframe(df, date_col)
     filtered_df = filter_dataframe(df, date_col)
+    logger.info(f"🎯 Dados filtrados: {len(filtered_df)} de {len(df)} registros")
 
     # Exibe os KPIs
+    logger.info("📊 Gerando KPIs")
     display_kpis(filtered_df, date_col)
 
     # Exibe gráficos
+    logger.info("📈 Gerando gráficos")
     display_charts(filtered_df, date_col)
 
     # Exibe tabela final
+    logger.info("🗂️ Exibindo tabela de dados")
     display_table(filtered_df)
+    
+    logger.info("✅ Dashboard renderizado com sucesso")
 
 
 if __name__ == '__main__':
-    main()
+    logger.info("🚀 Executando aplicação principal")
+    try:
+        main()
+        logger.info("✅ Aplicação finalizada com sucesso")
+    except Exception as e:
+        logger.error(f"💥 Erro crítico na aplicação: {e}")
+        st.error(f"Erro crítico: {e}")
+        raise
