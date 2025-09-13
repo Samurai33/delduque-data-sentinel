@@ -1,9 +1,9 @@
 
-# Data Sentinel - Delduque
+# Desduque Data Sentinel
 
-# Instruções para executar o Data Sentinel - Delduque
+# Instruções para executar o Desduque Data Sentinel
 
-O Data Sentinel - Delduque foi desenvolvido em **Streamlit** e utiliza **pandas** e **plotly** para manipulação e visualização de dados.
+O Desduque Data Sentinel foi desenvolvido em **Streamlit** e utiliza **pandas** e **plotly** para manipulação e visualização de dados.
 
 ## Pré-requisitos
 
@@ -38,9 +38,9 @@ O Data Sentinel - Delduque foi desenvolvido em **Streamlit** e utiliza **pandas*
 
    O terminal exibirá um URL (por padrão `http://localhost:8501`). Copie e cole no navegador para acessar o painel.
 
-## Sobre o Data Sentinel - Delduque
+## Sobre o Desduque Data Sentinel
 
-- O aplicativo lê todas as abas da planilha `BASE DATA SENTINEL DELDUQUE.xlsx`, mas foca nas abas **ATIVOS PF E PJ** e **CANCELADOS**.
+- O aplicativo lê todas as abas da planilha `BASE DESDUQUE DATA SENTINEL.xlsx`, mas foca nas abas **ATIVOS PF E PJ** e **CANCELADOS**.
 - Filtros interativos permitem selecionar **Usuário responsável**, **Categoria**, **Estado** e um intervalo de datas.
 - Métricas-chave (KPIs) exibem o total de registros filtrados, quantidade de categorias distintas e novos registros nos últimos 30 dias.
 - Gráficos interativos mostram:

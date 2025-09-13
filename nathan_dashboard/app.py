@@ -210,8 +210,8 @@ def display_table(df: pd.DataFrame):
 
 
 def main():
-    st.set_page_config(page_title='Data Sentinel - Delduque', layout='wide')
-    st.title('Data Sentinel - Delduque')
+    st.set_page_config(page_title='Desduque Data Sentinel', layout='wide')
+    st.title('Desduque Data Sentinel')
 
     st.markdown(
     'Este painel interativo foi desenvolvido para facilitar a tomada de decisões, '
@@ -219,7 +219,7 @@ def main():
         'escolher os gráficos adequados, manter a hierarquia visual e focar na clareza.'
     )
 
-    data = load_data('BASE DATA SENTINEL DELDUQUE.xlsx')
+    data = load_data('BASE DESDUQUE DATA SENTINEL.xlsx')
     # Apenas abas relevantes para o painel
     sheet_options = [s for s in ['ATIVOS PF E PJ', 'CANCELADOS'] if s in data]
     sheet = st.sidebar.selectbox('Selecionar aba', sheet_options)
