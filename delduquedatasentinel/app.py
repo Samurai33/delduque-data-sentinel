@@ -262,8 +262,8 @@ def display_table(df: pd.DataFrame):
 
 def main():
     logger.info("🖥️ Iniciando interface Streamlit")
-    st.set_page_config(page_title='Desduque Data Sentinel', layout='wide')
-    st.title('Desduque Data Sentinel')
+    st.set_page_config(page_title='Delduque Data Sentinel', layout='wide')
+    st.title('Delduque Data Sentinel')
 
     st.markdown(
     'Este painel interativo foi desenvolvido para facilitar a tomada de decisões, '
