@@ -219,7 +219,7 @@ def main():
         'escolher os gráficos adequados, manter a hierarquia visual e focar na clareza.'
     )
 
-    data = load_data('base_delduque.xlsx')
+    data = load_data('BASE DESDUQUE DATA SENTINEL.xlsx')
     # Apenas abas relevantes para o painel
     sheet_options = [s for s in ['ATIVOS PF E PJ', 'CANCELADOS'] if s in data]
     sheet = st.sidebar.selectbox('Selecionar aba', sheet_options)
