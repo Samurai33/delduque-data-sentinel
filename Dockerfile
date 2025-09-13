@@ -5,6 +5,15 @@ FROM python:3.13-slim
 # Defina o diretório de trabalho
 WORKDIR /app
 
+# Instale compiladores e dependências do sistema
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    g++ \
+    python3-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copie os arquivos de requirements e instale as dependências
 COPY nathan_dashboard/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
