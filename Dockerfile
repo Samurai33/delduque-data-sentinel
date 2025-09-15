@@ -1,4 +1,4 @@
-# Dockerfile para Desduque Data Sentinel
+# Dockerfile para Delduque Data Sentinel
 # Use uma imagem oficial do Python como base
 FROM python:3.13-slim
 

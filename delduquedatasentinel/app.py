@@ -1,38 +1,46 @@
 import os
-import logging
-import datetime
+from dotenv import load_dotenv
+load_dotenv()
+GOOGLE_DRIVE_FILE_ID = os.getenv("GOOGLE_DRIVE_FILE_ID")
+from googleapiclient.discovery import build
+from google.oauth2 import service_account
+import io
 
-# Configuração do sistema de logging
-def setup_logging():
-    """Configura o sistema de logging com informações detalhadas"""
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s | %(levelname)s | %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
-    return logging.getLogger(__name__)
-
-logger = setup_logging()
-
+def exportar_sheets_para_xlsx(file_id, destino):
+    """
+    Exporta uma planilha Google Sheets como .xlsx usando a API do Drive.
+    """
+    if os.path.exists(destino):
+        print(f"Arquivo já existe localmente: {destino}")
+        return
+    try:
+        print(f"Exportando Google Sheets para Excel: {file_id} -> {destino}")
+        SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
+        SERVICE_ACCOUNT_FILE = 'credentials.json'
+        creds = service_account.Credentials.from_service_account_file(
+            SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+        service = build('drive', 'v3', credentials=creds)
+        request = service.files().export_media(fileId=file_id, mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        data = request.execute()
+        with open(destino, 'wb') as out_file:
+            out_file.write(data)
+        print(f"Arquivo exportado com sucesso: {destino}")
+    except Exception as e:
+        print(f"Erro ao exportar Google Sheets: {e}")
+        raise
 def print_ascii_art():
     asciiart_path = os.path.join(os.path.dirname(__file__), '..', 'asciiart')
     try:
         with open(asciiart_path, 'r', encoding='utf-8') as f:
             art = f.read()
         print(art)
-        logger.info("🎨 Arte ASCII carregada com sucesso")
     except Exception as e:
-        logger.error(f"❌ Falha ao carregar arte ASCII: {e}")
         print('Não foi possível carregar a arte ASCII:', e)
 
-logger.info("🚀 Iniciando Desduque Data Sentinel...")
 print_ascii_art()
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-
-logger.info("📦 Bibliotecas importadas com sucesso")
 
 
 @st.cache_data(show_spinner=False)
@@ -43,33 +51,16 @@ def load_data(file_path: str):
     O uso de `st.cache_data` garante que o arquivo só seja lido uma vez durante
     a sessão, melhorando a performance.
     """
-    logger.info(f"📊 Iniciando carregamento de dados: {file_path}")
-    start_time = datetime.datetime.now()
-    
-    try:
-        xls = pd.ExcelFile(file_path)
-        data = {}
-        sheet_count = 0
-        
-        for name in xls.sheet_names:
-            try:
-                df = xls.parse(name)
-                data[name] = df
-                sheet_count += 1
-                logger.info(f"✅ Aba '{name}' carregada: {len(df)} registros")
-            except Exception as e:
-                logger.warning(f"⚠️ Falha ao carregar aba '{name}': {e}")
-                # ignore sheets that cannot be parsed
-                pass
-        
-        end_time = datetime.datetime.now()
-        duration = (end_time - start_time).total_seconds()
-        logger.info(f"🎯 Carregamento concluído: {sheet_count} abas em {duration:.2f}s")
-        return data
-        
-    except Exception as e:
-        logger.error(f"❌ Erro crítico ao carregar arquivo: {e}")
-        raise
+    xls = pd.ExcelFile(file_path)
+    data = {}
+    for name in xls.sheet_names:
+        try:
+            df = xls.parse(name)
+            data[name] = df
+        except Exception:
+            # ignore sheets that cannot be parsed
+            pass
+    return data
 
 
 def prepare_dataframe(df: pd.DataFrame, date_col: str) -> pd.DataFrame:
@@ -82,23 +73,10 @@ def prepare_dataframe(df: pd.DataFrame, date_col: str) -> pd.DataFrame:
     Returns:
         DataFrame com a coluna de data convertida
     """
-    logger.info(f"🔄 Preparando DataFrame: {len(df)} registros iniciais")
-    
     df = df.copy()
     if date_col in df.columns:
-        original_count = len(df)
         df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
         df = df.dropna(subset=[date_col])
-        final_count = len(df)
-        
-        if original_count != final_count:
-            removed = original_count - final_count
-            logger.info(f"🧹 Removidos {removed} registros com datas inválidas")
-        
-        logger.info(f"✅ DataFrame preparado: {final_count} registros válidos")
-    else:
-        logger.warning(f"⚠️ Coluna de data '{date_col}' não encontrada")
-    
     return df
 
 
@@ -261,7 +239,6 @@ def display_table(df: pd.DataFrame):
 
 
 def main():
-    logger.info("🖥️ Iniciando interface Streamlit")
     st.set_page_config(page_title='Delduque Data Sentinel', layout='wide')
     st.title('Delduque Data Sentinel')
 
@@ -271,55 +248,82 @@ def main():
         'escolher os gráficos adequados, manter a hierarquia visual e focar na clareza.'
     )
 
-    # Verificar se arquivo existe
-    file_path = 'base_delduque.xlsx'
-    if not os.path.exists(file_path):
-        logger.error(f"❌ Arquivo não encontrado: {file_path}")
-        st.error(f"❌ Arquivo não encontrado: `{file_path}`")
-        st.stop()
-
-    data = load_data(file_path)
+    # Tela de loading animada customizada
+    loading_html = '''
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 180px;">
+        <svg width="80" height="80" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" stroke="#25c5c0">
+            <g fill="none" fill-rule="evenodd" stroke-width="4">
+                <circle cx="22" cy="22" r="18" stroke-opacity=".3"/>
+                <path d="M40 22c0-9.94-8.06-18-18-18">
+                    <animateTransform attributeName="transform" type="rotate" from="0 22 22" to="360 22 22" dur="1s" repeatCount="indefinite"/>
+                </path>
+            </g>
+        </svg>
+        <div style="margin-top: 18px; font-size: 1.3rem; color: #25c5c0; font-weight: 600; letter-spacing: 0.5px;">Carregando dataset seguro...</div>
+    </div>
+    '''
+    loading_placeholder = st.empty()
+    loading_placeholder.markdown(loading_html, unsafe_allow_html=True)
+    exportar_sheets_para_xlsx(GOOGLE_DRIVE_FILE_ID, 'BASE DELDUQUE DATA SENTINEL.xlsx')
+    data = load_data('BASE DELDUQUE DATA SENTINEL.xlsx')
+    loading_placeholder.empty()
+    # Badge minimalista e pulsante de conexão
+    badge_html = '''
+    <style>
+    .pulse-badge {
+        display: inline-flex;
+        align-items: center;
+        background: #222c24;
+        color: #25c5c0;
+        border-radius: 18px;
+        padding: 0.25rem 1rem 0.25rem 0.6rem;
+        font-size: 1rem;
+        font-weight: 500;
+        box-shadow: 0 1px 6px 0 rgba(36,197,192,0.10);
+        margin: 1.2rem 0 0.5rem 0;
+        animation: fadeInBadge 1.1s;
+    }
+    .pulse-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #25c5c0;
+        margin-right: 0.6rem;
+        box-shadow: 0 0 0 0 #25c5c0;
+        animation: pulse 1.2s infinite cubic-bezier(0.66,0,0,1);
+    }
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 #25c5c055; }
+        70% { box-shadow: 0 0 0 8px #25c5c000; }
+        100% { box-shadow: 0 0 0 0 #25c5c000; }
+    }
+    @keyframes fadeInBadge {
+        from { opacity: 0; transform: translateY(-10px);} to { opacity: 1; transform: translateY(0);}
+    }
+    </style>
+    <div class="pulse-badge">
+        <span class="pulse-dot"></span>
+        Base conectada
+    </div>
+    '''
+    st.markdown(badge_html, unsafe_allow_html=True)
     # Apenas abas relevantes para o painel
     sheet_options = [s for s in ['ATIVOS PF E PJ', 'CANCELADOS'] if s in data]
-    
-    if not sheet_options:
-        logger.error("❌ Nenhuma aba relevante encontrada")
-        st.error("❌ Abas 'ATIVOS PF E PJ' ou 'CANCELADOS' não encontradas no arquivo")
-        st.stop()
-    
-    logger.info(f"📋 Abas disponíveis: {sheet_options}")
     sheet = st.sidebar.selectbox('Selecionar aba', sheet_options)
-    logger.info(f"🔍 Aba selecionada: {sheet}")
-    
     df = data[sheet]
     date_col = 'Data de cadastro' if sheet == 'ATIVOS PF E PJ' else 'Data de saida'
-    logger.info(f"📅 Coluna de data definida: {date_col}")
-    
     df = prepare_dataframe(df, date_col)
     filtered_df = filter_dataframe(df, date_col)
-    logger.info(f"🎯 Dados filtrados: {len(filtered_df)} de {len(df)} registros")
 
     # Exibe os KPIs
-    logger.info("📊 Gerando KPIs")
     display_kpis(filtered_df, date_col)
 
     # Exibe gráficos
-    logger.info("📈 Gerando gráficos")
     display_charts(filtered_df, date_col)
 
     # Exibe tabela final
-    logger.info("🗂️ Exibindo tabela de dados")
     display_table(filtered_df)
-    
-    logger.info("✅ Dashboard renderizado com sucesso")
 
 
 if __name__ == '__main__':
-    logger.info("🚀 Executando aplicação principal")
-    try:
-        main()
-        logger.info("✅ Aplicação finalizada com sucesso")
-    except Exception as e:
-        logger.error(f"💥 Erro crítico na aplicação: {e}")
-        st.error(f"Erro crítico: {e}")
-        raise
+    main()

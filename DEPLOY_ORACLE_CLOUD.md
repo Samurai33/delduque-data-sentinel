@@ -1,4 +1,4 @@
-# Instruções para deploy do Desduque Data Sentinel na Oracle Cloud (Ubuntu)
+# Instruções para deploy do Delduque Data Sentinel na Oracle Cloud (Ubuntu)
 
 1. **Clone seu repositório privado do GitHub**
 
@@ -20,8 +20,8 @@ sudo usermod -aG docker $USER
 3. **Build e run do container**
 
 ```bash
-docker build -t desduque-data-sentinel .
-docker run -d -p 8501:8501 --name desduque-data-sentinel desduque-data-sentinel
+docker build -t delduque-data-sentinel .
+docker run -d -p 8501:8501 --name delduque-data-sentinel delduque-data-sentinel
 ```
 
 4. **Acesse pelo navegador**
@@ -32,6 +32,6 @@ Abra: `http://<IP_DA_SUA_VM>:8501`
 
 **Dica:**
 - Para atualizar, basta dar `git pull`, rebuildar e reiniciar o container.
-- Para logs: `docker logs -f desduque-data-sentinel`
-- Para parar: `docker stop desduque-data-sentinel`
-- Para remover: `docker rm desduque-data-sentinel`
+- Para logs: `docker logs -f delduque-data-sentinel`
+- Para parar: `docker stop delduque-data-sentinel`
+- Para remover: `docker rm delduque-data-sentinel`
