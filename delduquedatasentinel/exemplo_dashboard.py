@@ -34,7 +34,7 @@ def gerar_dados_demonstracao():
     # Datas dos últimos 60 dias com registros a cada hora
     end_date = pd.Timestamp.now()
     start_date = end_date - pd.Timedelta(days=60)
-    date_range = pd.date_range(start=start_date, end=end_date, freq='H')
+    date_range = pd.date_range(start=start_date, end=end_date, freq='h')
     
     # Gerar 2000 registros aleatórios
     n_records = 2000

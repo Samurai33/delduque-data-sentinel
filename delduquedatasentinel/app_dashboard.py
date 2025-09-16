@@ -17,7 +17,7 @@ from datetime import datetime
 try:
     from streamlit_plotly_events import plotly_events
     HAS_PLOTLY_EVENTS = True
-except Exception:
+except (ImportError, ModuleNotFoundError):
     HAS_PLOTLY_EVENTS = False
 
 # Theme colors
@@ -156,7 +156,7 @@ def build_stacked_or_grouped_bars(df: pd.DataFrame, mode: str = "Empilhado") -> 
     return fig
 
 def build_heatmap_scatter(df: pd.DataFrame) -> go.Figure:
-    agg = df.groupby(["dow", "hora"], as_index=False)["valor"].sum()
+    agg = df.groupby(["dow", "hora"], as_index=False, observed=True)["valor"].sum()
     size = (agg["valor"] - agg["valor"].min())
     if size.max() > 0:
         size = 8 + (size / size.max()) * 38
@@ -187,7 +187,7 @@ def capture_plotly_event(fig: go.Figure, height: int = 350, key: Optional[str] =
         events = plotly_events(fig, select_event=True, override_height=height, key=key)
         return events or []
     else:
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
         return []
 
 def criar_dashboard(dataframe: pd.DataFrame):
@@ -317,9 +317,10 @@ def criar_dashboard(dataframe: pd.DataFrame):
                           {"selector": "tbody tr:nth-child(even)", "props": [("background-color", "transparent")]},
                       ])
                       .format({"valor": "{:,.2f}"}))
-            st.dataframe(styled, use_container_width=True, height=360)
+            st.dataframe(styled, width="stretch", height=360)
         except Exception:
-            st.dataframe(display_df_small, use_container_width=True, height=360)
+            # Fallback if Streamlit version doesn't accept Styler
+            st.dataframe(display_df_small, width="stretch", height=360)
         st.markdown("</div>", unsafe_allow_html=True)
 
     with st.expander("Sobre este painel e dependências"):
