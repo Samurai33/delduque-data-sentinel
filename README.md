@@ -3,14 +3,12 @@
 ![datasentinel_logo](datasentinel_logo.png)
 
 <div align="center">
-  
-## Data Sentinel
 
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.32.0-red?logo=streamlit)](https://streamlit.io/)
 [![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-> **Delduque Data Sentinel** é um painel interativo para análise e visualização de dados sensíveis, com integração segura ao Google Drive, desenvolvido para facilitar a tomada de decisões com foco em segurança, performance e experiência do usuário.
+> **Data Sentinel** é um painel interativo para análise e visualização de dados sensíveis, com integração segura ao Google Drive, desenvolvido para facilitar a tomada de decisões com foco em segurança, performance e experiência do usuário.
 
 ---
 
@@ -38,13 +36,13 @@
 ## ⚡ Instalação Rápida
 
 ```bash
-git clone https://github.com/Samurai33/delduque-data-sentinel.git
-cd delduque-data-sentinel
+git clone https://github.com/Samurai33/data-sentinel.git
+cd data-sentinel
 python -m venv .venv
 source .venv/bin/activate  # ou .venv\Scripts\activate no Windows
 pip install -r requirements.txt
 # Configure .env e credentials.json conforme instruções abaixo
-streamlit run delduquedatasentinel/app.py
+streamlit run datasentinel/app.py
 ```
 
 ---
