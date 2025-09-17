@@ -59,8 +59,8 @@ streamlit run datasentinel/app.py
 ## ☁️ Deploy com Docker
 
 ```bash
-docker build -t delduque-data-sentinel .
-docker run -d -p 8501:8501 --env-file .env -v $(pwd)/credentials.json:/app/credentials.json delduque-data-sentinel
+docker build -t data-sentinel .
+docker run -d -p 8501:8501 --env-file .env -v $(pwd)/credentials.json:/app/credentials.json data-sentinel
 ```
 
 ---
