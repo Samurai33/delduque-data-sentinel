@@ -1,4 +1,9 @@
-# Delduque Data Sentinel
+<div align="center">
+
+![datasentinel_logo](datasentinel_logo.png)
+
+<div align="center">
+# Data Sentinel
 
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.32.0-red?logo=streamlit)](https://streamlit.io/)
 [![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python)](https://www.python.org/)
